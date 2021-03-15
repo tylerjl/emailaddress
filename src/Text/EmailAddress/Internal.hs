@@ -41,7 +41,7 @@ import Database.PostgreSQL.Simple.FromField
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 import Opaleye
-    ( Column, Constant(..), PGText, QueryRunnerColumn
+    ( Column, Constant(..), DefaultFromField(..), PGText, QueryRunnerColumn
     , QueryRunnerColumnDefault(..) , fieldQueryRunnerColumn )
 import Text.Read (Read(readPrec), ReadPrec)
 import Web.HttpApiData
