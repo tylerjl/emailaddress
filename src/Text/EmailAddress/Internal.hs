@@ -27,7 +27,6 @@ import Data.Aeson.Types (Parser)
 import Data.Bifunctor (first)
 import Data.ByteString (ByteString)
 import Data.Data (Data)
-import Data.Monoid ((<>))
 import Data.Profunctor (lmap)
 import Data.Profunctor.Product.Default (Default(def))
 import Data.Proxy (Proxy(Proxy))
@@ -41,8 +40,8 @@ import Database.PostgreSQL.Simple.FromField
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 import Opaleye
-    ( Column, Constant(..), DefaultFromField(..), PGText, QueryRunnerColumn
-    , QueryRunnerColumnDefault(..) , fieldQueryRunnerColumn )
+    ( Column, DefaultFromField(..), PGText, ToFields
+     , fieldQueryRunnerColumn )
 import Text.Read (Read(readPrec), ReadPrec)
 import Web.HttpApiData
     ( FromHttpApiData(parseUrlPiece), ToHttpApiData(toUrlPiece) )
@@ -56,8 +55,8 @@ newtype EmailAddress = EmailAddress
     { unEmailAddress :: EmailValidate.EmailAddress }
     deriving (Data, Eq, Generic, Ord, Typeable)
 
-instance Default Constant EmailAddress (Column PGText) where
-    def :: Constant EmailAddress (Column PGText)
+instance Default ToFields EmailAddress (Column PGText) where
+    def :: ToFields EmailAddress (Column PGText)
     def = lmap (decodeUtf8With lenientDecode . toByteString) def
 
 instance FromField EmailAddress where
@@ -139,9 +138,8 @@ instance PersistFieldSql EmailAddress where
     sqlType :: Proxy EmailAddress -> SqlType
     sqlType _ = sqlType (Proxy :: Proxy Text)
 
-instance QueryRunnerColumnDefault PGText EmailAddress where
-    queryRunnerColumnDefault :: QueryRunnerColumn PGText EmailAddress
-    queryRunnerColumnDefault = fieldQueryRunnerColumn
+instance DefaultFromField PGText EmailAddress where
+    defaultFromField = fieldQueryRunnerColumn
 
 -- |
 -- >>> toText $ read "\"foo@gmail.com\""
