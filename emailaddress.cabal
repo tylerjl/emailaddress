@@ -1,5 +1,5 @@
 name:                emailaddress
-version:             0.2.0.2
+version:             0.2.0.3
 synopsis:            Wrapper around email-validate library adding instances for common type classes.
 description:         Please see README.md
 homepage:            https://github.com/cdepillabout/emailaddress#readme
@@ -24,7 +24,7 @@ library
                      , bytestring >= 0.9
                      , email-validate >= 2
                      , http-api-data >= 0.2
-                     , opaleye >= 0.4
+                     , opaleye >= 0.4 && < 0.6.7004.0
                      , path-pieces >= 0.2
                      , persistent >= 2
                      , postgresql-simple >= 0.5
