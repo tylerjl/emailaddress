@@ -2,39 +2,23 @@
 all: build
 
 clean:
-	stack clean
+	cabal new-clean
 
 build: 
-	stack build
+	cabal new-build
 
 haddock: build-haddock
 build-haddock:
-	stack build --haddock
-
-# Watch for changes.
-watch:
-	stack build --file-watch --fast .
-
-# Watch for changes.
-watch-test: watch-tests
-watch-tests:
-	stack test --file-watch --fast .
+	cabal new-haddock
 
 # Run ghci using stack.
 repl: ghci
 ghci:
-	stack ghci
+	cabal new-repl
 
 test:
-	stack test
+	cabal new-test
 
 # Run hlint.
 lint:
 	hlint src/
-
-# This runs a small python websever on port 8001 serving up haddocks for
-# packages you have installed.
-#
-# In order to run this, you need to have run `make build-haddock`.
-haddock-server:
-	cd "$$(stack path --local-doc-root)" && python3 -m http.server 8001
