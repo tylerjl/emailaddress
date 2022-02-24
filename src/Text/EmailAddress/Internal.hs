@@ -40,8 +40,9 @@ import Database.PostgreSQL.Simple.FromField
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
 import Opaleye
-    ( Column, DefaultFromField(..), PGText, ToFields
-     , fieldQueryRunnerColumn )
+    ( SqlText, ToFields
+     , fromPGSFromField, Field )
+import Opaleye.RunSelect (DefaultFromField(..))
 import Text.Read (Read(readPrec), ReadPrec)
 import Web.HttpApiData
     ( FromHttpApiData(parseUrlPiece), ToHttpApiData(toUrlPiece) )
@@ -55,8 +56,8 @@ newtype EmailAddress = EmailAddress
     { unEmailAddress :: EmailValidate.EmailAddress }
     deriving (Data, Eq, Generic, Ord, Typeable)
 
-instance Default ToFields EmailAddress (Column PGText) where
-    def :: ToFields EmailAddress (Column PGText)
+instance Default ToFields EmailAddress (Field SqlText) where
+    def :: ToFields EmailAddress (Field SqlText)
     def = lmap (decodeUtf8With lenientDecode . toByteString) def
 
 instance FromField EmailAddress where
@@ -138,8 +139,8 @@ instance PersistFieldSql EmailAddress where
     sqlType :: Proxy EmailAddress -> SqlType
     sqlType _ = sqlType (Proxy :: Proxy Text)
 
-instance DefaultFromField PGText EmailAddress where
-    defaultFromField = fieldQueryRunnerColumn
+instance DefaultFromField SqlText EmailAddress where
+    defaultFromField = fromPGSFromField
 
 -- |
 -- >>> toText $ read "\"foo@gmail.com\""
