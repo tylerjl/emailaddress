@@ -27,22 +27,14 @@ import Data.Aeson.Types (Parser)
 import Data.Bifunctor (first)
 import Data.ByteString (ByteString)
 import Data.Data (Data)
-import Data.Profunctor (lmap)
-import Data.Profunctor.Product.Default (Default(def))
 import Data.Proxy (Proxy(Proxy))
 import Data.Text (Text, pack)
 import Data.Text.Encoding (decodeUtf8With, encodeUtf8)
 import Data.Text.Encoding.Error (lenientDecode)
 import Database.Persist (PersistField(..), PersistValue)
 import Database.Persist.Sql (PersistFieldSql(..), SqlType)
-import Database.PostgreSQL.Simple.FromField
-    ( Conversion, FieldParser, FromField(..), ResultError(..), returnError )
 import Data.Typeable (Typeable)
 import GHC.Generics (Generic)
-import Opaleye
-    ( SqlText, ToFields
-     , fromPGSFromField, Field )
-import Opaleye.RunSelect (DefaultFromField(..))
 import Text.Read (Read(readPrec), ReadPrec)
 import Web.HttpApiData
     ( FromHttpApiData(parseUrlPiece), ToHttpApiData(toUrlPiece) )
@@ -55,20 +47,6 @@ import qualified Text.Email.Validate as EmailValidate
 newtype EmailAddress = EmailAddress
     { unEmailAddress :: EmailValidate.EmailAddress }
     deriving (Data, Eq, Generic, Ord, Typeable)
-
-instance Default ToFields EmailAddress (Field SqlText) where
-    def :: ToFields EmailAddress (Field SqlText)
-    def = lmap (decodeUtf8With lenientDecode . toByteString) def
-
-instance FromField EmailAddress where
-    fromField :: FieldParser EmailAddress
-    -- fromField :: Field -> Maybe ByteString -> Conversion EmailAddress
-    fromField field Nothing = returnError UnexpectedNull field ""
-    fromField field (Just email) = maybe err return $ emailAddress email
-      where
-        err :: Conversion EmailAddress
-        err = returnError ConversionFailed field $
-            "Could not convert " <> show email <> " to email address"
 
 -- | This instance assumes 'EmailAddress' is UTF8-encoded.  See
 -- 'validateFromText'.
@@ -138,9 +116,6 @@ instance PersistField EmailAddress where
 instance PersistFieldSql EmailAddress where
     sqlType :: Proxy EmailAddress -> SqlType
     sqlType _ = sqlType (Proxy :: Proxy Text)
-
-instance DefaultFromField SqlText EmailAddress where
-    defaultFromField = fromPGSFromField
 
 -- |
 -- >>> toText $ read "\"foo@gmail.com\""
